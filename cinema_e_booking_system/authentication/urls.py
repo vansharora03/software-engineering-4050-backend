@@ -1,5 +1,5 @@
 """
-URL configuration for cinema_e_booking_system project.
+URL configuration for server project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -14,11 +14,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path
+from . import views
 
 urlpatterns = [
-    path("v1/", include("v1.urls")),
-    path('', include("authentication.urls")),
-    path('admin/', admin.site.urls),
+    re_path('login', views.login),
+    re_path('signup', views.signup),
+    re_path('test', views.test_token),
 ]

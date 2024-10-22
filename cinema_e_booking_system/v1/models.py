@@ -30,3 +30,9 @@ class Showroom(models.Model):
 class Seat(models.Model):
     number = models.PositiveIntegerField()
     showroom = models.ForeignKey(Showroom, on_delete=models.CASCADE)
+
+class Showtime(models.Model):
+    time = models.DateTimeField(editable=True)
+    duration = models.PositiveIntegerField()
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    showroom = models.ForeignKey(Showroom, on_delete=models.CASCADE)

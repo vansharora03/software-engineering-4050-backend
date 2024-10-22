@@ -26,3 +26,7 @@ class Showroom(models.Model):
     
     def __str__(self):
         return self.name
+
+class Seat(models.Model):
+    number = models.PositiveIntegerField()
+    showroom = models.ForeignKey(Showroom, on_delete=models.CASCADE)

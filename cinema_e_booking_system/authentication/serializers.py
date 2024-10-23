@@ -15,7 +15,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Customer
-        fields = ['user', 'email', 'first_name', 'last_name', 'phone_number', 'address', 'email_verified', 'subscribed_to_promotions', 'account_state']
+        fields = ['user', 'email', 'first_name', 'last_name', 'phone_number', 'address', 'subscribed_to_promotions', 'account_state']
 
     def create(self, validated_data):
 

@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Customer(models.Model):
-    email_verified = models.BooleanField(default=False)
     subscribed_to_promotions = models.BooleanField(default=False)
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=100)

@@ -21,5 +21,7 @@ urlpatterns = [
     re_path('login', views.login),
     re_path('register', views.register),
     re_path('test', views.test_token),
-    path('verify-email/<str:token>', views.verify_email, name='verify_email'),
+    re_path('check_email', views.check_email),
+    re_path('reset_password', views.reset_password),
+
 ]

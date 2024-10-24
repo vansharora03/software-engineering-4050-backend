@@ -84,3 +84,27 @@ class Showtime(models.Model):
 
     class Meta:
         db_table = "Showtime"
+
+class TicketType(models.Model):
+    name = models.CharField(max_length=50) 
+    price = models.DecimalField(max_digits=6, decimal_places=2)  
+
+    class Meta:
+        db_table = 'TicketType'
+        verbose_name_plural = 'TicketTypes'
+
+    def __str__(self):
+        return f'{self.name} - {self.price}'
+
+
+class Ticket(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)  
+    ticket_type = models.ForeignKey(TicketType, on_delete=models.CASCADE) 
+    seat_number = models.CharField(max_length=10) 
+
+    class Meta:
+        db_table = 'Ticket'
+        verbose_name_plural = 'Tickets'
+
+    def __str__(self):
+        return f'Ticket for {self.booking.movie_title} ({self.ticket_type.name})'

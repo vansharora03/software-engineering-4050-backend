@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer, CustomerSerializer
+from .serializers import AdminSerializer, UserSerializer, CustomerSerializer
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -19,7 +19,7 @@ def login(request):
     user = get_object_or_404(User, username=request.data['username'])
     if not user.check_password(request.data['password']):
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-    token = Token.objects.get_or_create(user=user)
+    token, created = Token.objects.get_or_create(user=user)
     serializer = UserSerializer(instance=user)
     return Response({"token": token.key, "user": serializer.data})
 
@@ -29,12 +29,29 @@ def register(request):
     if serializer.is_valid():
         serializer.save()  
         user = serializer.instance.user  
-        # send a verification email
+        
+        # Generate a unique token for email verification
+        token = get_random_string(32)
+        
+        # Save the token in the Customer model for verification
+        customer = serializer.instance
+        customer.verification_token = token
+        customer.save()
+        
+        # Send a verification email with the token
+        verification_url = request.build_absolute_uri(reverse('verify-email', kwargs={'token': token}))
+        send_mail(
+            subject='Verify your email address',
+            message=f'Click the link to verify your account: {verification_url}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[request.data['email']],
+            fail_silently=False,
+        )
 
-        token = Token.objects.create(user=user)
-        return Response({"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"detail": "Registration successful! Please check your email to verify your account."}, status=status.HTTP_201_CREATED)
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -43,15 +60,24 @@ def test_token(request):
     return Response("passed for {}".format(request.user.username))
 
 @api_view(['GET'])
+# Function that is invoked when the email is verified 
 def verify_email(request, token):
-    user = ...
-    if user:
-        user.is_active = True
-        user.save()
-        return Response({"detail": "Email verified successfully!"})
-    return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        # Find the customer by the verification token
+        customer = Customer.objects.get(verification_token=token)
+        
+        # Activate the user's account
+        customer.account_state = 'active'
+        customer.verification_token = ''  # Clear the token once verified
+        customer.save()
+
+        return Response({"detail": "Email verified successfully!"}, status=status.HTTP_200_OK)
+    except Customer.DoesNotExist:
+        return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
+# Function to check if the email is existing inside the database
 def check_email(request):
     email = request.data.get('email')
     
@@ -87,3 +113,12 @@ def reset_password(request):
         return Response({"detail": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
     except User.DoesNotExist:
         return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+# @api_view(['POST'])
+# def create_admin(request):
+#     serializer = AdminSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         user = serializer.instance.user
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

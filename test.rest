@@ -23,6 +23,20 @@ Content-Type: application/json
   "account_state": "active"
 }
 
+###
+POST http://127.0.0.1:8000/create_admin
+Content-Type: application/json
+
+{
+    "user": {
+        "username": "admin@example.com",
+        "password": "123"
+    },
+    "email": "admin@example.com",
+    "first_name": "Admin",
+    "last_name": "User"
+}
+
 
 
 

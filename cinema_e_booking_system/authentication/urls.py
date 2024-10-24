@@ -23,5 +23,6 @@ urlpatterns = [
     re_path('test', views.test_token),
     re_path('check_email', views.check_email),
     re_path('reset_password', views.reset_password),
-
+    path('verify-email/<str:token>/', views.verify_email, name='verify-email'),
+    # path('create_admin', views.create_admin)
 ]

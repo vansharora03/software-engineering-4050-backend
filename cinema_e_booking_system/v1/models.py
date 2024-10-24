@@ -8,7 +8,7 @@ class Customer(models.Model):
     last_name = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
-    
+    verification_token = models.CharField(max_length=32, blank=True, null=True)
     # Enum
     ACTIVE = 'active'
     INACTIVE = 'inactive'
@@ -34,6 +34,8 @@ from django.db import models
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
+    email = models.EmailField(max_length=255, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     def __str__(self):
         return self.user.username

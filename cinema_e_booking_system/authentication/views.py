@@ -13,6 +13,47 @@ from django.urls import reverse
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate
+
+@api_view(['GET', 'PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    if request.method == 'GET':
+        try:
+            profile_data = {
+                "first_name": request.user.customer.first_name,
+                "last_name": request.user.customer.last_name,
+                "email": request.user.customer.email,
+                "address": request.user.customer.address,
+                "phone_number": request.user.customer.phone_number,
+            }
+            return Response(profile_data)
+        except AttributeError:
+            return Response({"detail": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        data = request.data
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+
+        # Verify current password
+        user = authenticate(username=request.user.username, password=current_password)
+        if not user:
+            return Response({"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.customer.first_name = data.get('first_name', request.user.customer.first_name)
+        request.user.customer.last_name = data.get('last_name', request.user.customer.last_name)
+        request.user.customer.address = data.get('address', request.user.customer.address)
+
+        # Update password if new password is provided
+        if new_password:
+            request.user.set_password(new_password)
+
+        request.user.customer.save()
+        request.user.save()
+        return Response({"message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def login(request):
@@ -21,6 +62,7 @@ def login(request):
         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
     serializer = UserSerializer(instance=user)
+    print(token)
     return Response({"token": token.key, "user": serializer.data})
 
 @api_view(['POST'])

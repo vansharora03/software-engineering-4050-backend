@@ -98,9 +98,7 @@ WSGI_APPLICATION = 'cinema_e_booking_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cinema',
-        'USER': environ["DB_USER"],
-        'PASSWORD': environ["DB_PASSWORD"]
+        'NAME': 'cinema'
     }
 }
 

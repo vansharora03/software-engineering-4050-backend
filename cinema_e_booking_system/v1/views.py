@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import MovieForm
 from .models import Movie
 from .serializers import MovieSerializer
-from .models import Booking, Promotion, PaymentCard
+from .models import Booking, Promotion, PaymentCard, Ticket, TicketType
 
 # Create your views here.
 
@@ -96,3 +96,45 @@ def payment_card_delete(request, id):
     card = get_object_or_404(PaymentCard, id=id, user=request.user)
     card.delete()
     return redirect('payment_card_list')
+
+
+# Ticket Views
+def ticket_list(request):
+    tickets = Ticket.objects.filter(booking__user=request.user)
+    return render(request, 'tickets/ticket_list.html', {'tickets': tickets})
+
+def ticket_create(request):
+    return render(request, 'tickets/ticket_form.html')
+
+def ticket_detail(request, id):
+    ticket = get_object_or_404(Ticket, id=id, booking__user=request.user)
+    return render(request, 'tickets/ticket_detail.html', {'ticket': ticket})
+
+def ticket_update(request, id):
+    return render(request, 'tickets/ticket_form.html')
+
+def ticket_delete(request, id):
+    ticket = get_object_or_404(Ticket, id=id, booking__user=request.user)
+    ticket.delete()
+    return redirect('ticket_list')
+
+
+# TicketType Views
+def ticket_type_list(request):
+    ticket_types = TicketType.objects.all()
+    return render(request, 'ticket_types/ticket_type_list.html', {'ticket_types': ticket_types})
+
+def ticket_type_create(request):
+    return render(request, 'ticket_types/ticket_type_form.html')
+
+def ticket_type_detail(request, id):
+    ticket_type = get_object_or_404(TicketType, id=id)
+    return render(request, 'ticket_types/ticket_type_detail.html', {'ticket_type': ticket_type})
+
+def ticket_type_update(request, id):
+    return render(request, 'ticket_types/ticket_type_form.html')
+
+def ticket_type_delete(request, id):
+    ticket_type = get_object_or_404(TicketType, id=id)
+    ticket_type.delete()
+    return redirect('ticket_type_list')

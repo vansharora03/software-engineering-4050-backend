@@ -6,6 +6,11 @@ from .forms import MovieForm
 from .models import Movie
 from .serializers import MovieSerializer
 from .models import Booking, Promotion, PaymentCard, Ticket, TicketType
+from django.contrib.auth.models import User
+import hashlib
+from datetime import datetime, time
+
+
 
 # Create your views here.
 
@@ -83,7 +88,14 @@ def payment_card_list(request):
     return render(request, 'payment_cards/payment_card_list.html', {'cards': cards})
 
 def payment_card_add(request):
-    return render(request, 'payment_cards/payment_card_form.html')
+    PaymentCard.objects.create(
+        user = get_object_or_404(User, id=int(request.POST["user_id"])),
+        cardholder_name = request.POST["cardholder_name"],
+        hashed_card_number = hashlib.sha256(request.POST["card_number"].encode()).hexdigest(),
+        expiry_date = datetime.strptime(request.POST["expiry_date"], "%Y-%m-%dT%H:%M:%S%z"),
+        billing_address = request.POST["billing_address"]
+    )
+    return HttpResponse(status=201)
 
 def payment_card_detail(request, id):
     card = get_object_or_404(PaymentCard, id=id, user=request.user)

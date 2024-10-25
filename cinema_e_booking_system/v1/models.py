@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import hashlib
 
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -36,9 +37,22 @@ class Promotion(models.Model):
 class PaymentCard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cardholder_name = models.CharField(max_length=255)
-    last_four_digits = models.CharField(max_length=4)
+    hashed_card_number = models.CharField(max_length=64)
     expiry_date = models.DateField()
-    card_type = models.CharField(max_length=50)  # e.g., Visa, MasterCard
+    billing_address = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'PaymentCard'
+    
+    def hash_card_number(card_number):
+        """Hashes the card number using SHA256."""
+        return hashlib.sha256(card_number.encode()).hexdigest()
+    
+    def save(self, *args, **kwargs):
+        # Hash the card number before saving
+        if hasattr(self, 'card_number'):
+            self.hashed_card_number = self.hash_card_number(self.card_number)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.card_type} ending in {self.last_four_digits}'

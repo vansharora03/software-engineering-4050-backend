@@ -2,13 +2,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpRequest
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from .forms import MovieForm
 from .models import Movie
-from .serializers import MovieSerializer
+from .serializers import MovieSerializer, PaymentCardSerializer
 from .models import Booking, Promotion, PaymentCard, Ticket, TicketType
 from django.contrib.auth.models import User
 import hashlib
 from datetime import datetime, time
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+import json
+
 
 
 
@@ -83,17 +88,26 @@ def promotion_delete(request, id):
 
 
 # PaymentCard Views
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def payment_card_list(request):
     cards = PaymentCard.objects.filter(user=request.user)
-    return render(request, 'payment_cards/payment_card_list.html', {'cards': cards})
+    return HttpResponse(json.dumps(PaymentCardSerializer(cards, many=True).data))
 
+
+@api_view(['POST'])  # Make sure this is an API view
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
 def payment_card_add(request):
-    PaymentCard.objects.create(
-        user = get_object_or_404(User, id=int(request.POST["user_id"])),
-        cardholder_name = request.POST["cardholder_name"],
-        hashed_card_number = hashlib.sha256(request.POST["card_number"].encode()).hexdigest(),
-        expiry_date = datetime.strptime(request.POST["expiry_date"], "%Y-%m-%dT%H:%M:%S%z"),
-        billing_address = request.POST["billing_address"]
+
+    pc = PaymentCard.objects.create(
+        user = request.user,
+        cardholder_name = request.data.get("cardholder_name"),
+        hashed_card_number = hashlib.sha256(request.data.get("card_number").encode()).hexdigest(),
+        expiry_date = datetime.strptime(request.data.get("expiry_date"), "%Y-%m-%d"),
+        billing_address = request.data.get("billing_address")
     )
     return HttpResponse(status=201)
 
@@ -104,9 +118,12 @@ def payment_card_detail(request, id):
 def payment_card_update(request, id):
     return render(request, 'payment_cards/payment_card_form.html')
 
-def payment_card_delete(request, id):
-    card = get_object_or_404(PaymentCard, id=id, user=request.user)
-    card.delete()
+@api_view(['DELETE'])  # Make sure this is an API view
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def payment_card_delete(request, id=1):
+    PaymentCard.objects.filter(user=request.user).delete()
     return redirect('payment_card_list')
 
 

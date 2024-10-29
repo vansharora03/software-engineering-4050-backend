@@ -25,6 +25,8 @@ class Customer(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    class Meta:
+        db_table = "Customer"
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
@@ -48,6 +50,7 @@ class Booking(models.Model):
         return f'Booking for {self.movie_title} by {self.user.username}'
 
     class Meta:
+        db_table = "Booking"
         ordering = ['-booking_date']
 
 class Promotion(models.Model):
@@ -93,6 +96,10 @@ class Admin(models.Model):
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    class Meta:
+        db_table = "Admin"
+        verbose_name_plural = 'Admins'
+
     def __str__(self):
         return self.user.username
 

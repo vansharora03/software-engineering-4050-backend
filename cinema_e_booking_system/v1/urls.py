@@ -22,7 +22,7 @@ urlpatterns = [
     path("payment-cards/add", views.payment_card_add, name="payment_card_add"),
     path("payment-cards/<int:id>", views.payment_card_detail, name="payment_card_detail"),
     path("payment-cards/<int:id>/update", views.payment_card_update, name="payment_card_update"),
-    path("payment-cards/<int:id>/delete", views.payment_card_delete, name="payment_card_delete"),
+    path("payment-cards/delete", views.payment_card_delete, name="payment_card_delete"),
     # Ticket URLs
     path("tickets", views.ticket_list, name="ticket_list"),
     path("tickets/create", views.ticket_create, name="ticket_create"),

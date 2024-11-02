@@ -1,14 +1,43 @@
 POST http://127.0.0.1:8000/login 
 Content-Type: application/json
 
-{ "username": "adam", "password": "Pass1234!" }
+{ "username": "johndoe1234567890@example.com", "password": "securepassword" }
 
 
 ###
-POST http://127.0.0.1:8000/signup 
+POST http://127.0.0.1:8000/register
 Content-Type: application/json
 
-{ "username": "adam", "password": "Pass1234!", "email": "adam@mail.com" }
+{
+  "user": {
+    "username": "johndoe1234567890@example.com",
+    "password": "securepassword"
+  },
+  "email": "johndoe1234567890@example.com",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone_number": "1234567890",
+  "address": "123 Main St",
+  "email_verified": false,
+  "subscribed_to_promotions": true,
+  "account_state": "active"
+}
+
+###
+POST http://127.0.0.1:8000/create_admin
+Content-Type: application/json
+
+{
+    "user": {
+        "username": "admin@example.com",
+        "password": "123"
+    },
+    "email": "admin@example.com",
+    "first_name": "Admin",
+    "last_name": "User"
+}
+
+
 
 
 
@@ -16,6 +45,6 @@ Content-Type: application/json
 
 GET http://127.0.0.1:8000/test_token 
 Content-Type: application/json
-Authorization: Token ac05fcc3e69f54b79110912eabee6506c84c05da
+Authorization: Token dbbd53f80d60307b799f4c507f8b0de595f378e0
 
 {}

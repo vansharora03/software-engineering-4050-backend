@@ -8,7 +8,7 @@ class Booking(models.Model):
     seat_number = models.CharField(max_length=10)
     booking_date = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    promotion = models.ForeignKey('Promotion', null=True, blank=True, on_delete=models.SET_NULL)  # Nullable ForeignKey
+    promotion = models.ForeignKey('Promotion', null=True, blank=True, on_delete=models.SET_NULL)
     payment_card = models.ForeignKey('PaymentCard', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -32,7 +32,6 @@ class Promotion(models.Model):
         today = timezone.now().date()
         return self.start_date <= today <= self.end_date
 
-
 class PaymentCard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cardholder_name = models.CharField(max_length=255)
@@ -42,7 +41,6 @@ class PaymentCard(models.Model):
 
     def __str__(self):
         return f'{self.card_type} ending in {self.last_four_digits}'
-# Create your models here.
 
 class Movie(models.Model):
     title = models.CharField(max_length=100)

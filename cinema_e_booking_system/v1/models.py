@@ -90,8 +90,6 @@ class PaymentCard(models.Model):
 
     def __str__(self):
         return f'{self.card_type} ending in {self.last_four_digits}'
-<<<<<<< HEAD
-=======
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(max_length=255, unique=True)
@@ -103,8 +101,6 @@ class Admin(models.Model):
 
     def __str__(self):
         return self.user.username
->>>>>>> refs/remotes/origin/main
-
 class Movie(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()

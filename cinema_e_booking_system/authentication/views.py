@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -27,6 +27,7 @@ def profile(request):
                 "email": request.user.customer.email,
                 "address": request.user.customer.address,
                 "phone_number": request.user.customer.phone_number,
+                "subscribed_to_promotions": request.user.customer.subscribed_to_promotions,
             }
             return Response(profile_data)
         except AttributeError:
@@ -45,7 +46,7 @@ def profile(request):
         request.user.customer.first_name = data.get('first_name', request.user.customer.first_name)
         request.user.customer.last_name = data.get('last_name', request.user.customer.last_name)
         request.user.customer.address = data.get('address', request.user.customer.address)
-
+        request.user.customer.subscribed_to_promotions = data.get('subscribed_to_promotions', request.user.customer.subscribed_to_promotions)
         # Update password if new password is provided
         if new_password:
             request.user.set_password(new_password)
@@ -59,7 +60,7 @@ def profile(request):
 def login(request):
     user = get_object_or_404(User, username=request.data['username'])
     if not user.check_password(request.data['password']):
-        return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Not found."}, status=status.HTTP_400_BAD_REQUEST)
     token, created = Token.objects.get_or_create(user=user)
     serializer = UserSerializer(instance=user)
     print(token)
@@ -102,7 +103,6 @@ def test_token(request):
     return Response("passed for {}".format(request.user.username))
 
 @api_view(['GET'])
-# Function that is invoked when the email is verified 
 def verify_email(request, token):
     try:
         # Find the customer by the verification token
@@ -113,11 +113,12 @@ def verify_email(request, token):
         customer.verification_token = ''  # Clear the token once verified
         customer.save()
 
-        return Response({"detail": "Email verified successfully!"}, status=status.HTTP_200_OK)
+        # Redirect to the React page with a success status
+        return redirect(f"http://localhost:3000/verify-email/{token}?status=success")
     except Customer.DoesNotExist:
-        return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
-
-
+        # Redirect to the React page with a failure status
+        return redirect(f"http://localhost:3000/verify-email/{token}?status=error")
+     
 @api_view(['POST'])
 # Function to check if the email is existing inside the database
 def check_email(request):
@@ -164,3 +165,16 @@ def reset_password(request):
 #         user = serializer.instance.user
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
 #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def check_active_account(request):
+    try:
+        if request.user.customer.account_state == 'active':
+            return Response({"detail": "Account is active"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "Account is not active"}, status=status.HTTP_403_FORBIDDEN)
+    except AttributeError:
+        return Response({"detail": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)

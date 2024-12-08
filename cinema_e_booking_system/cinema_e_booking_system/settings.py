@@ -98,9 +98,14 @@ WSGI_APPLICATION = 'cinema_e_booking_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cinema'
+        'NAME': 'cinema',
+        'USER': 'root',         
+        'PASSWORD': 'root',    
+        'HOST': 'localhost',    
+        'PORT': '3306',         
     }
 }
+
 
 
 # Password validation

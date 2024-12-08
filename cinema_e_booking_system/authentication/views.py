@@ -67,6 +67,27 @@ def login(request):
     return Response({"token": token.key, "user": serializer.data})
 
 @api_view(['POST'])
+def reset(request):
+    email = request.data['email']
+    try:
+        print(email)
+        customer = Customer.objects.get(email=email)
+        user = customer.user
+        token = get_random_string(12)
+        user.password = make_password(token)
+        user.save()
+        send_mail(
+            subject='Password Reset',
+            message=f'Your new password is: {token}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        return Response({"detail": "Password reset successful! Check your email for the new password."}, status=status.HTTP_200_OK)
+    except Customer.DoesNotExist:
+        return Response({"detail": "Email not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
 def register(request):
     serializer = CustomerSerializer(data=request.data)
     if serializer.is_valid():

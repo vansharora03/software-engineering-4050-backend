@@ -108,14 +108,11 @@ def payment_card_add(request):
         user = request.user,
         cardholder_name = request.data.get("cardholder_name"),
         hashed_card_number = hashlib.sha256(request.data.get("card_number").encode()).hexdigest(),
-        expiry_date = datetime.strptime(request.data.get("expiry_date"), "%Y-%m-%d"),
+        expiry_date = datetime.strptime(request.data.get("expiry_date"), "%Y-%m-%d").date(),
         billing_address = request.data.get("billing_address"),
         last_four_digits = request.data.get("last_four_digits")
     )
-    return HttpResponse(status=201)
-
-def payment_card_detail(request, id):
-    card = get_object_or_404(PaymentCard, id=id, user=request.user)
+    return JsonResponse(PaymentCardSerializer(pc).data, status=201)
     return render(request, 'payment_cards/payment_card_detail.html', {'card': card})
 
 def payment_card_update(request, id):
@@ -204,6 +201,8 @@ def get_booking(request, id):
     return JsonResponse({"booking": BookingSerializer(booking).data}, status=200)
 
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def add_booking(request):
     showtime = Showtime.objects.get(id=request.data.get("showtime"))
     card = PaymentCard.objects.get(id=request.data.get("card"))
@@ -212,21 +211,38 @@ def add_booking(request):
         promotion = Promotion.objects.get(id=request.data.get("promotion"))
     booking = Booking.objects.create(
         user = request.user,
-        show_time = showtime,
         payment_card = card,
         promotion = promotion,
         booking_date = datetime.now()
     )
     return JsonResponse({"booking": BookingSerializer(booking).data}, status=201)
 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_bookings(request):
+    bookings = Booking.objects.filter(user=request.user)
+    return JsonResponse({"bookings": BookingSerializer(bookings, many=True).data}, status=200)
+
+@api_view(['GET'])
+def get_tickets(request, id):
+    booking = Booking.objects.get(id=id)
+    tickets = Ticket.objects.filter(booking=booking)
+    return JsonResponse({"tickets": TicketSerializer(tickets, many=True).data}, status=200)
+
+
 @api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def add_ticket(request):
     booking = Booking.objects.get(id=request.data.get("booking"))
     ticket_type = TicketType.objects.get(id=request.data.get("ticket_type"))
+    showtime = Showtime.objects.get(id=request.data.get("showtime"))
     ticket = Ticket.objects.create(
         booking = booking,
         ticket_type = ticket_type,
-        seat_number = request.data.get("seat_number")
+        seat_number = request.data.get("seat_number"),
+        showtime = showtime
     )
     return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=201)
 

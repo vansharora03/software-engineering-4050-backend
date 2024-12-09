@@ -27,6 +27,7 @@ class BookingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class TicketTypeSerializer(serializers.ModelSerializer):
+    showtime = ShowtimeSerializer()
     class Meta:
         model = TicketType
         fields = "__all__"

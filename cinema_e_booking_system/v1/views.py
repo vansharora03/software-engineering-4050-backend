@@ -173,15 +173,15 @@ def ticket_type_delete(request, id):
 @api_view(['GET']) 
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def showtimes(request, movie_title):
-    showtimes = Showtime.objects.filter(movie__title=movie_title)
+def showtimes(request, movie_id):
+    showtimes = Showtime.objects.filter(movie__id=movie_id)
     return JsonResponse({"showtimes": ShowtimeSerializer(showtimes, many=True).data}, status=200)
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def add_showtime(request, movie_title):
-    movie = Movie.objects.get(title=movie_title)
+def add_showtime(request, movie_id):
+    movie = Movie.objects.get(id=movie_id)
     showroom = Showroom.objects.get(name=request.data.get("showroom"))
     showtime = Showtime.objects.create(
         time = datetime.strptime(request.data.get("time"), "%Y-%m-%d %H:%M:%S"),

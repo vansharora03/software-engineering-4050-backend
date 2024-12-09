@@ -11,9 +11,11 @@ urlpatterns = [
     path("seats", views.add_seat, name="add_seat"),
     path("tickets", views.add_ticket, name="add_ticket"),
     path("tickets/<int:ticket_id>", views.get_ticket, name="get_ticket"),
+    path("bookings/<int:id>/tickets", views.get_tickets, name="get_tickets"),
      # Booking URLs
     path("bookings/<int:id>", views.get_booking, name="get_booking"),
     path("bookings", views.add_booking, name="add_booking"),
+    path("bookings/get", views.get_bookings, name="get_bookings"),
     # Promotion URLs
     path("promotions", views.promotion_list, name="promotion_list"),
     path("promotions/create", views.promotion_create, name="promotion_create"),

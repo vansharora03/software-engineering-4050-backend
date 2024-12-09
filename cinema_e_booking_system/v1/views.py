@@ -217,6 +217,20 @@ def add_booking(request):
     )
     return JsonResponse({"booking": BookingSerializer(booking).data}, status=201)
 
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_bookings(request):
+    bookings = Booking.objects.filter(user=request.user)
+    return JsonResponse({"bookings": BookingSerializer(bookings, many=True).data}, status=200)
+
+@api_view(['GET'])
+def get_tickets(request, id):
+    booking = Booking.objects.get(id=id)
+    tickets = Ticket.objects.filter(booking=booking)
+    return JsonResponse({"tickets": TicketSerializer(tickets, many=True).data}, status=200)
+
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])

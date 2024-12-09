@@ -68,28 +68,36 @@ class Promotion(models.Model):
         today = timezone.now().date()
         return self.start_date <= today <= self.end_date
 
+import hashlib
+
 class PaymentCard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cardholder_name = models.CharField(max_length=255)
+    card_number = models.CharField(max_length=19)  # Add this field to store the raw card number
     hashed_card_number = models.CharField(max_length=64)
     expiry_date = models.DateField()
     billing_address = models.CharField(max_length=255)
+    last_four_digits = models.CharField(max_length=4, blank=True, null=True)  # Store the last 4 digits
 
     class Meta:
         db_table = 'PaymentCard'
-    
-    def hash_card_number(card_number):
+
+    def hash_card_number(self, card_number):
         """Hashes the card number using SHA256."""
         return hashlib.sha256(card_number.encode()).hexdigest()
-    
+
     def save(self, *args, **kwargs):
         # Hash the card number before saving
-        if hasattr(self, 'card_number'):
+        if hasattr(self, 'card_number') and self.card_number:
+            # Hash the card number and store it
             self.hashed_card_number = self.hash_card_number(self.card_number)
+            # Extract the last four digits from the raw card number
+            self.last_four_digits = self.card_number[-4:]  # Get the last 4 digits
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.card_type} ending in {self.last_four_digits}'
+        return f'{self.cardholder_name} ending in {self.last_four_digits}'
+
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     email = models.EmailField(max_length=255, unique=True)

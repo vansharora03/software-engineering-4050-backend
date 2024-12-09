@@ -9,7 +9,7 @@ class MovieSerializer(serializers.ModelSerializer):
 class PaymentCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentCard
-        fields = ["cardholder_name", "billing_address", "expiry_date"]
+        fields = "__all__"
 
 class ShowtimeSerializer(serializers.ModelSerializer):
     class Meta:

@@ -14,7 +14,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.permissions import IsAuthenticated
 import json
 from django.http import JsonResponse
-
+from rest_framework.response import Response
 
 
 
@@ -93,9 +93,10 @@ def promotion_delete(request, id):
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def payment_card_list(request):
+    if not request.user.is_authenticated:
+        return Response({"error": "Authentication required."}, status=401)
     cards = PaymentCard.objects.filter(user=request.user)
-    return HttpResponse(json.dumps(PaymentCardSerializer(cards, many=True).data))
-
+    return JsonResponse(PaymentCardSerializer(cards, many=True).data, safe=False)
 
 @api_view(['POST'])  # Make sure this is an API view
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -108,7 +109,8 @@ def payment_card_add(request):
         cardholder_name = request.data.get("cardholder_name"),
         hashed_card_number = hashlib.sha256(request.data.get("card_number").encode()).hexdigest(),
         expiry_date = datetime.strptime(request.data.get("expiry_date"), "%Y-%m-%d"),
-        billing_address = request.data.get("billing_address")
+        billing_address = request.data.get("billing_address"),
+        last_four_digits = request.data.get("last_four_digits")
     )
     return HttpResponse(status=201)
 
@@ -210,7 +212,7 @@ def add_booking(request):
         promotion = Promotion.objects.get(id=request.data.get("promotion"))
     booking = Booking.objects.create(
         user = request.user,
-        showtime = showtime,
+        show_time = showtime,
         payment_card = card,
         promotion = promotion,
         booking_date = datetime.now()

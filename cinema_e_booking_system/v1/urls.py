@@ -7,12 +7,13 @@ urlpatterns = [
     path("movies/<int:movie_id>", views.movies, name="getMovie"),
     path("movies/<int:movie_id>/showtimes", views.showtimes, name="showtimes"),
     path("showtimes/movies/<int:movie_id>", views.add_showtime, name="add_showtime"),
+    path("showtimes/<int:showtime_id>/seats/<int:seat_number>", views.is_seat_available, name="is_seat_available"),
+    path("seats", views.add_seat, name="add_seat"),
+    path("tickets", views.add_ticket, name="add_ticket"),
+    path("tickets/<int:ticket_id>", views.get_ticket, name="add_ticket"),
      # Booking URLs
-    path("bookings", views.booking_list, name="booking_list"),
-    path("bookings/create", views.booking_create, name="booking_create"),
-    path("bookings/<int:id>", views.booking_detail, name="booking_detail"),
-    path("bookings/<int:id>/update", views.booking_update, name="booking_update"),
-    path("bookings/<int:id>/delete", views.booking_delete, name="booking_delete"),
+    path("bookings/<int:id>", views.get_booking, name="get_booking"),
+    path("bookings", views.add_booking, name="add_booking"),
     # Promotion URLs
     path("promotions", views.promotion_list, name="promotion_list"),
     path("promotions/create", views.promotion_create, name="promotion_create"),

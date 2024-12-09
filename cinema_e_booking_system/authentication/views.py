@@ -211,10 +211,23 @@ def send_order_email(request):
     booking_id = data.get('booking_id')
     try:
         booking = Booking.objects.get(id=booking_id)
-        ticket = Ticket.objects.get(booking=booking)
+        tickets = Ticket.objects.filter(booking=booking)
+        
+        showtime = None
+        arr = []
+        total =0
+        for ticket in tickets:
+            arr.append(ticket.seat_number)
+            showtime = ticket.showtime
+            total += ticket.ticket_type.price
+        print(arr)
         send_mail(
             subject='Order Confirmation',
-            message=f'Your booking for {ticket.showtime.movie.title} has been confirmed!',
+            message=(f'Your booking for {showtime.movie.title} has been confirmed!\n'
+                     f'Showtime: {showtime.time}\n'
+                     f'Showroom: {showtime.showroom.name}\n'
+                     f'Seat number(s): {",".join(arr)}\n'
+                     f'Total price: ${total}'),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             fail_silently=False,

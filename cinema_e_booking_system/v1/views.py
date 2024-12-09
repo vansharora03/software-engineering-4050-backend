@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from .forms import MovieForm
 from .models import Movie
-from .serializers import MovieSerializer, PaymentCardSerializer, ShowtimeSerializer
-from .models import Booking, Promotion, PaymentCard, Ticket, TicketType, Showtime, Showroom
+from .serializers import MovieSerializer, PaymentCardSerializer, ShowtimeSerializer, BookingSerializer, SeatSerializer, TicketSerializer, PromotionSerializer
+from .models import Booking, Promotion, PaymentCard, Ticket, TicketType, Showtime, Showroom, Seat
 from django.contrib.auth.models import User
 import hashlib
 from datetime import datetime, time
@@ -186,4 +186,76 @@ def add_showtime(request, movie_id):
         showroom = showroom
     )
     return JsonResponse({"showtime": ShowtimeSerializer(showtime).data}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_seat(request):
+    showroom = Showroom.objects.get(name=request.data.get("showroom"))
+    seat = Seat.objects.create(
+        number = request.data.get("number"),
+        showroom = showroom
+    )
+    return JsonResponse({"seat": SeatSerializer(seat)}, status=201)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_booking(request, id):
+    booking = Booking.objects.get(id=id)
+    return JsonResponse({"booking": BookingSerializer(booking).data}, status=200)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_booking(request):
+    showtime = Showtime.objects.get(id=request.data.get("showtime"))
+    card = PaymentCard.objects.get(id=request.data.get("card"))
+    promotion = None
+    if (request.data.get("promotion")):
+        promotion = Promotion.objects.get(id=request.data.get("promotion"))
+    booking = Booking.objects.create(
+        user = request.user,
+        showtime = showtime,
+        payment_card = card,
+        promotion = promotion,
+        booking_date = datetime.now()
+    )
+    return JsonResponse({"booking": BookingSerializer(booking).data}, status=201)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_ticket(request):
+    booking = Booking.objects.get(id=request.data.get("booking"))
+    ticket_type = TicketType.objects.get(id=request.data.get("ticket_type"))
+    ticket = Ticket.objects.create(
+        booking = booking,
+        ticket_type = ticket_type,
+        seat_number = request.data.get("seat_number")
+    )
+    return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=201)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_ticket(request, id):
+    ticket = Ticket.objects.get(id=id)
+    return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=200)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def is_seat_available(request, showtime_id, seat_number):
+    showtime = Showtime.objects.get(id=showtime_id)
+    return not JsonResponse(Ticket.objects.filter(booking__showtime=showtime, seat_number=seat_number).exists(), status=200)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_promotion(request, name):
+    promotion = Promotion.objects.get(name=name)
+    return JsonResponse({"promotion": PromotionSerializer(promotion).data}, status=200)
+
+
 

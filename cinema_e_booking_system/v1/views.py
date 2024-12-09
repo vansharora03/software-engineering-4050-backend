@@ -220,7 +220,7 @@ def add_booking(request):
         promotion = Promotion.objects.get(id=request.data.get("promotion"))
     booking = Booking.objects.create(
         user = request.user,
-        showtime = showtime,
+        show_time = showtime,
         payment_card = card,
         promotion = promotion,
         booking_date = datetime.now()
@@ -252,8 +252,8 @@ def get_ticket(request, id):
 @permission_classes([IsAuthenticated])
 def is_seat_available(request, showtime_id, seat_number):
     showtime = Showtime.objects.get(id=showtime_id)
-    booking = Booking.objects.get(showtime=showtime, user=request.user)
-    return JsonResponse(not Ticket.objects.filter(booking=booking, seat_number=seat_number).exists(), status=200)
+    booking = Booking.objects.get(show_time=showtime)
+    return JsonResponse(not Ticket.objects.filter(show_time=showtime, seat_number=seat_number).exists(), status=200)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

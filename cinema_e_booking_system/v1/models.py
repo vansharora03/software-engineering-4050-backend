@@ -39,7 +39,7 @@ import hashlib
 class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     movie_title = models.CharField(max_length=255, null=True, blank=True)
-    show_time = models.DateTimeField()
+    show_time = models.ForeignKey('Showtime', on_delete=models.CASCADE)
     seat_number = models.CharField(max_length=10, null=True, blank=True)
     booking_date = models.DateTimeField(auto_now_add=True)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)

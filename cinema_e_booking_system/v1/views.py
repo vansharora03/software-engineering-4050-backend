@@ -200,7 +200,7 @@ def add_seat(request):
         number = request.data.get("number"),
         showroom = showroom
     )
-    return JsonResponse({"seat": SeatSerializer(seat)}, status=201)
+    return JsonResponse({"seat": SeatSerializer(seat).data}, status=201)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -252,7 +252,8 @@ def get_ticket(request, id):
 @permission_classes([IsAuthenticated])
 def is_seat_available(request, showtime_id, seat_number):
     showtime = Showtime.objects.get(id=showtime_id)
-    return not JsonResponse(Ticket.objects.filter(booking__showtime=showtime, seat_number=seat_number).exists(), status=200)
+    booking = Booking.objects.get(showtime=showtime, user=request.user)
+    return JsonResponse(not Ticket.objects.filter(booking=booking, seat_number=seat_number).exists(), status=200)
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

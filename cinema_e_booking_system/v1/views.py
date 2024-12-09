@@ -5,14 +5,15 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from .forms import MovieForm
 from .models import Movie
-from .serializers import MovieSerializer, PaymentCardSerializer
-from .models import Booking, Promotion, PaymentCard, Ticket, TicketType
+from .serializers import MovieSerializer, PaymentCardSerializer, ShowtimeSerializer
+from .models import Booking, Promotion, PaymentCard, Ticket, TicketType, Showtime, Showroom
 from django.contrib.auth.models import User
 import hashlib
 from datetime import datetime, time
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 import json
+from django.http import JsonResponse
 
 
 
@@ -127,6 +128,7 @@ def payment_card_delete(request, id=1):
     return redirect('payment_card_list')
 
 
+
 # Ticket Views
 def ticket_list(request):
     tickets = Ticket.objects.filter(booking__user=request.user)
@@ -167,3 +169,25 @@ def ticket_type_delete(request, id):
     ticket_type = get_object_or_404(TicketType, id=id)
     ticket_type.delete()
     return redirect('ticket_type_list')
+
+@api_view(['GET']) 
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def showtimes(request, movie_title):
+    showtimes = Showtime.objects.filter(movie__title=movie_title)
+    return JsonResponse({"showtimes": ShowtimeSerializer(showtimes, many=True).data}, status=200)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_showtime(request, movie_title):
+    movie = Movie.objects.get(title=movie_title)
+    showroom = Showroom.objects.get(name=request.data.get("showroom"))
+    showtime = Showtime.objects.create(
+        time = datetime.strptime(request.data.get("time"), "%Y-%m-%d %H:%M:%S"),
+        duration = request.data.get("duration"),
+        movie = movie,
+        showroom = showroom
+    )
+    return JsonResponse({"showtime": ShowtimeSerializer(showtime).data}, status=201)
+

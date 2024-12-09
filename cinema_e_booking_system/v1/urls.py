@@ -5,6 +5,7 @@ urlpatterns = [
     path("hello", views.hello, name="hello"),
     path("movies", views.movies, name="movies"),
     path("movies/<int:movie_id>", views.movies, name="getMovie"),
+    path("movies/<str:movie_title>/showtimes", views.showtimes, name="showtimes"),
      # Booking URLs
     path("bookings", views.booking_list, name="booking_list"),
     path("bookings/create", views.booking_create, name="booking_create"),

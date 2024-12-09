@@ -12,7 +12,6 @@ class PaymentCardSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 class ShowtimeSerializer(serializers.ModelSerializer):
-    movie = MovieSerializer()
     class Meta:
         model = Showtime
         fields = "__all__"

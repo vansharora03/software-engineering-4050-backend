@@ -38,9 +38,6 @@ Content-Type: application/json
 }
 
 
-
-
-
 ###
 GET http://127.0.0.1:8000/test_token 
 Content-Type: application/json
@@ -49,8 +46,17 @@ Authorization: Token dbbd53f80d60307b799f4c507f8b0de595f378e0
 {}
 
 ###
-POST http://127.0.0.1:8000/v1/showtimes/movies/1
+POST http://127.0.0.1:8000/v1/showtimes/movies/2
+Content-Type: application/json
+Authorization: Token 457ff2cb2a8b0c0128b470e856c4521f4c545e24
 
+{
+  "showroom": "a2",
+  "time": "2024-12-12 15:00:00",
+  "duration": 120
+}
+
+###
 GET http://127.0.0.1:8000/v1/showtimes/2/seats/5
 Content-Type: application/json
 Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2

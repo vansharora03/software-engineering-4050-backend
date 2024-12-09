@@ -99,6 +99,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cinema',
+        'USER': 'root',
+        'PASSWORD': 'root',
     
     }
 }

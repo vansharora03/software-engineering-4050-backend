@@ -50,11 +50,156 @@ Authorization: Token dbbd53f80d60307b799f4c507f8b0de595f378e0
 
 ###
 POST http://127.0.0.1:8000/v1/showtimes/movies/1
+
+GET http://127.0.0.1:8000/v1/showtimes/2/seats/5
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{}
+
+### Request 1
+POST http://127.0.0.1:8000/v1/seats
 Content-Type: application/json
 Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
 
 {
+  "number": 7,
+  "showroom": "a1"
+}
+
+### Request 2
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 8,
+  "showroom": "a1"
+}
+
+### Request 3
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 9,
+  "showroom": "a1"
+}
+
+### Request 4
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 10,
+  "showroom": "a1"
+}
+
+### Request 5
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 11,
+  "showroom": "a1"
+}
+
+### Request 6
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 12,
+  "showroom": "a1"
+}
+
+### Request 7
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 13,
+  "showroom": "a1"
+}
+
+### Request 8
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 14,
+  "showroom": "a1"
+}
+
+### Request 9
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 15,
+  "showroom": "a1"
+}
+
+### Request 10
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 16,
+  "showroom": "a1"
+}
+
+### Request 11
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 17,
+  "showroom": "a1"
+}
+
+### Request 12
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 18,
+  "showroom": "a1"
+}
+
+### Request 13
+POST http://127.0.0.1:8000/v1/seats
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+  "number": 19,
+  "showroom": "a1"
+}
+
+### Request 14
+POST http://127.0.0.1:8000/v1/seats
+
+Content-Type: application/json
+Authorization: Token 42f880e5a5697f70ac09c7870b43db08c614ecf2
+
+{
+
   "showroom": "a1",
   "time": "2024-12-09 15:00:00",
   "duration": 120
+
+  "number": 20,
+  "showroom": "a1"
+
 }

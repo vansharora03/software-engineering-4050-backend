@@ -7,7 +7,7 @@ from .serializers import AdminSerializer, UserSerializer, CustomerSerializer
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from v1.models import Customer
+from v1.models import Booking, Customer, Ticket
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.crypto import get_random_string
@@ -199,3 +199,30 @@ def check_active_account(request):
             return Response({"detail": "Account is not active"}, status=status.HTTP_403_FORBIDDEN)
     except AttributeError:
         return Response({"detail": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def send_order_email(request):
+    data = request.data
+    email = request.user.customer.email
+    booking_id = data.get('booking_id')
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        ticket = Ticket.objects.get(booking=booking)
+        send_mail(
+            subject='Order Confirmation',
+            message=f'Your booking for {ticket.showtime.movie.title} has been confirmed!',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        return Response({"detail": "Order confirmation sent"}, status=status.HTTP_200_OK)
+    except Customer.DoesNotExist:
+        return Response({"detail": "Customer not found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Booking.DoesNotExist:
+        return Response({"detail": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+        

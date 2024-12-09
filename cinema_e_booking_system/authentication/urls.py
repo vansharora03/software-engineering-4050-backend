@@ -26,5 +26,6 @@ urlpatterns = [
     path('verify-email/<str:token>/', views.verify_email, name='verify-email'),
     path('profile/', views.profile, name='profile'),
     re_path('check_active_account', views.check_active_account),
+    re_path('send_order_email', views.send_order_email),
     # path('create_admin', views.create_admin)
 ]

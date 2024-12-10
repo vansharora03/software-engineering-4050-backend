@@ -174,3 +174,37 @@ class Ticket(models.Model):
     def __str__(self):
         return f'Ticket for {self.booking.movie_title} ({self.ticket_type.name})'
 
+from django.db import models
+from django.utils.timezone import now
+
+class TheatreLoggingSystem(models.Model):
+    date = models.DateField(default=now, unique=True)
+    child_purchases = models.PositiveIntegerField(default=0)
+    adult_purchases = models.PositiveIntegerField(default=0)
+    senior_purchases = models.PositiveIntegerField(default=0)
+    total_purchases = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = 'TheatreLoggingSystem'
+
+    @classmethod
+    def get_instance(cls):
+        """Ensure only one instance exists for the current date."""
+        instance, created = cls.objects.get_or_create(date=now().date())
+        return instance
+
+    def record_ticket_purchase(self, category):
+        """Record a ticket purchase by category."""
+        if category == "child":
+            self.child_purchases += 1
+        elif category == "adult":
+            self.adult_purchases += 1
+        elif category == "senior":
+            self.senior_purchases += 1
+        else:
+            raise ValueError("Invalid category. Must be 'child', 'adult', or 'senior'.")
+        self.total_purchases += 1
+        self.save()
+
+    def __str__(self):
+        return f"Log for {self.date}: {self.total_purchases} purchases"

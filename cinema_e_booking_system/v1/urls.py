@@ -27,5 +27,7 @@ urlpatterns = [
     path("payment-cards/add", views.payment_card_add, name="payment_card_add"),
     path("payment-cards/<int:id>/update", views.payment_card_update, name="payment_card_update"),
     path("payment-cards/delete", views.payment_card_delete, name="payment_card_delete"),
+    # Logging metrics
+    path("logging/metrics", views.get_logging_metrics, name="get_logging_metrics"),
 ]
 

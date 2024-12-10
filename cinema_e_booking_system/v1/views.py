@@ -261,5 +261,3 @@ def get_promotion(request, name):
     promotion = Promotion.objects.get(name=name)
     return JsonResponse({"promotion": PromotionSerializer(promotion).data}, status=200)
 
-
-

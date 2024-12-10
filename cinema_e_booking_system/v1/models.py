@@ -173,3 +173,4 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f'Ticket for {self.booking.movie_title} ({self.ticket_type.name})'
+

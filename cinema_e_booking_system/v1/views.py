@@ -363,12 +363,7 @@ def get_showroom(request, id):
     return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=200)
 
 
-from django.http import JsonResponse
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from .models import TheatreLoggingSystem, Booking, TicketType, Showtime, Ticket
-from .serializers import TicketSerializer
+
 
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

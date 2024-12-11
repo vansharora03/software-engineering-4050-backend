@@ -200,6 +200,8 @@ def get_booking(request, id):
     booking = Booking.objects.get(id=id)
     return JsonResponse({"booking": BookingSerializer(booking).data}, status=200)
 
+from django.core.exceptions import ObjectDoesNotExist
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -207,14 +209,21 @@ def add_booking(request):
     showtime = Showtime.objects.get(id=request.data.get("showtime"))
     card = PaymentCard.objects.get(id=request.data.get("card"))
     promotion = None
-    if (request.data.get("promotion")):
-        promotion = Promotion.objects.get(name=request.data.get("promotion"))
+    promotion_name = request.data.get("promotion")
+
+    if promotion_name:
+        try:
+            promotion = Promotion.objects.get(name=promotion_name)
+        except ObjectDoesNotExist:
+            return JsonResponse({"error": "Promotion not found."}, status=400)
+    
     booking = Booking.objects.create(
-        user = request.user,
-        payment_card = card,
-        promotion = promotion,
-        booking_date = datetime.now()
+        user=request.user,
+        payment_card=card,
+        promotion=promotion,
+        booking_date=datetime.now()
     )
+    
     return JsonResponse({"booking": BookingSerializer(booking).data}, status=201)
 
 @api_view(['GET'])

@@ -113,7 +113,7 @@ class Movie(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     trailer_link = models.CharField(max_length=500)
-    img_link = models.CharField(max_length=500)
+    img_link = models.CharField(max_length=500, null=True, blank=True)
     duration = models.PositiveIntegerField() 
     release_date = models.DateTimeField(editable=True)
 

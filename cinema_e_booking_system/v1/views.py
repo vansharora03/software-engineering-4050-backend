@@ -361,3 +361,47 @@ def get_showroom(request, id):
     showroom = Showroom.objects.get(id=id)
     return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=200)
 
+
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from .models import TheatreLoggingSystem, Booking, TicketType, Showtime, Ticket
+from .serializers import TicketSerializer
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_ticket(request):
+    booking = Booking.objects.get(id=request.data.get("booking"))
+    ticket_type = TicketType.objects.get(id=request.data.get("ticket_type"))
+    showtime = Showtime.objects.get(id=request.data.get("showtime"))
+    ticket = Ticket.objects.create(
+        booking=booking,
+        ticket_type=ticket_type,
+        seat_number=request.data.get("seat_number"),
+        showtime=showtime
+    )
+
+    # Update the logging system
+    category = request.data.get("category")  # Expecting 'child', 'adult', 'senior'
+    logger = TheatreLoggingSystem.get_instance()
+    logger.record_ticket_purchase(category)
+
+    return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=201)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_logging_metrics(request):
+    logger = TheatreLoggingSystem.get_instance()
+    metrics = {
+        "date": logger.date,
+        "child_purchases": logger.child_purchases,
+        "adult_purchases": logger.adult_purchases,
+        "senior_purchases": logger.senior_purchases,
+        "total_purchases": logger.total_purchases,
+    }
+    return JsonResponse({"metrics": metrics}, status=200)
+
+

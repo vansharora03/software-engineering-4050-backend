@@ -264,10 +264,15 @@ def get_promotion(request, name):
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def add_ticket(request):
     booking = Booking.objects.get(id=request.data.get("booking"))
     ticket_type = TicketType.objects.get(id=request.data.get("ticket_type"))
     showtime = Showtime.objects.get(id=request.data.get("showtime"))
+    
+   
     ticket = Ticket.objects.create(
         booking=booking,
         ticket_type=ticket_type,
@@ -275,12 +280,18 @@ def add_ticket(request):
         showtime=showtime
     )
 
-    # Update the logging system
-    category = request.data.get("category")  # Expecting 'child', 'adult', 'senior'
+    
+    category = ticket_type.name.lower()  
     logger = TheatreLoggingSystem.get_instance()
-    logger.record_ticket_purchase(category)
+    
+    
+    if category in ["child", "adult", "senior"]:
+        logger.record_ticket_purchase(category)
+    else:
+        raise ValueError(f"Invalid ticket type name: {ticket_type.name}")
 
     return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=201)
+
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])

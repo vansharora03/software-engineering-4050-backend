@@ -266,6 +266,50 @@ def get_promotion(request, name):
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_ticket(request):
+    booking = Booking.objects.get(id=request.data.get("booking"))
+    ticket_type = TicketType.objects.get(id=request.data.get("ticket_type"))
+    showtime = Showtime.objects.get(id=request.data.get("showtime"))
+    
+   
+    ticket = Ticket.objects.create(
+        booking=booking,
+        ticket_type=ticket_type,
+        seat_number=request.data.get("seat_number"),
+        showtime=showtime
+    )
+
+    
+    category = ticket_type.name.lower()  
+    logger = TheatreLoggingSystem.get_instance()
+    
+    
+    if category in ["child", "adult", "senior"]:
+        logger.record_ticket_purchase(category)
+    else:
+        raise ValueError(f"Invalid ticket type name: {ticket_type.name}")
+
+    return JsonResponse({"ticket": TicketSerializer(ticket).data}, status=201)
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_logging_metrics(request):
+    logger = TheatreLoggingSystem.get_instance()
+    metrics = {
+        "date": logger.date,
+        "child_purchases": logger.child_purchases,
+        "adult_purchases": logger.adult_purchases,
+        "senior_purchases": logger.senior_purchases,
+        "total_purchases": logger.total_purchases,
+    }
+    return JsonResponse({"metrics": metrics}, status=200)
+  
 def create_movie(request):
     movie = Movie.objects.create(
         title = request.data.get("title"),
@@ -316,3 +360,4 @@ def add_showroom(request):
 def get_showroom(request, id):
     showroom = Showroom.objects.get(id=id)
     return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=200)
+

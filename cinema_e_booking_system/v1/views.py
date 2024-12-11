@@ -175,9 +175,11 @@ def showtimes(request, movie_id):
     return JsonResponse({"showtimes": ShowtimeSerializer(showtimes, many=True).data}, status=200)
 
 @api_view(['POST'])
-def add_showtime(request, movie_id):
-    movie = Movie.objects.get(id=movie_id)
+def add_showtime(request):
+    movie = Movie.objects.get(title=request.data.get("movie"))
     showroom = Showroom.objects.get(name=request.data.get("showroom"))
+    if Showtime.objects.filter(time=request.data.get("time"), showroom=showroom).exists():
+        return JsonResponse({"error": "Showtime already exists for chosen showroom"}, status=400)
     showtime = Showtime.objects.create(
         time = datetime.strptime(request.data.get("time"), "%Y-%m-%d %H:%M:%S"),
         duration = request.data.get("duration"),

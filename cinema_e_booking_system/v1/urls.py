@@ -29,6 +29,7 @@ urlpatterns = [
     path("payment-cards/delete", views.payment_card_delete, name="payment_card_delete"),
     # Logging metrics
     path("logging/metrics", views.get_logging_metrics, name="get_logging_metrics"),
+    path("add-ticket", views.add_ticket, name="add_ticket"),
 
     # Admin control urls
     path("delete-movie/<int:id>", views.delete_movie, name="delete_movie"),
@@ -36,5 +37,7 @@ urlpatterns = [
     path("update-movie/<int:id>", views.update_movie, name="update_movie"),
     path("add-showroom", views.add_showroom, name="add_showroom"),
     path("get-showroom", views.get_showroom, name="showroom"),
+
+    
 ]
 

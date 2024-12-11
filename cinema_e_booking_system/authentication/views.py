@@ -178,14 +178,14 @@ def reset_password(request):
     except User.DoesNotExist:
         return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-# @api_view(['POST'])
-# def create_admin(request):
-#     serializer = AdminSerializer(data=request.data)
-#     if serializer.is_valid():
-#         serializer.save()
-#         user = serializer.instance.user
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def create_admin(request):
+    serializer = AdminSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        user = serializer.instance.user
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -237,5 +237,3 @@ def send_order_email(request):
         return Response({"detail": "Customer not found"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except Booking.DoesNotExist:
         return Response({"detail": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
-    
-        

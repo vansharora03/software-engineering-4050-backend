@@ -125,7 +125,7 @@ class Movie(models.Model):
 
 class Showroom(models.Model):
     name = models.CharField(max_length=100)
-
+    seat_count = models.PositiveIntegerField(null=True, blank=True)
     class Meta:
         db_table = 'Showroom'
         verbose_name_plural = 'Showrooms'

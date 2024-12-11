@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from .forms import MovieForm
 from .models import Movie
-from .serializers import MovieSerializer, PaymentCardSerializer, ShowtimeSerializer, BookingSerializer, SeatSerializer, TicketSerializer, PromotionSerializer
+from .serializers import MovieSerializer, PaymentCardSerializer, ShowtimeSerializer, BookingSerializer, SeatSerializer, TicketSerializer, PromotionSerializer, ShowroomSerializer
 from .models import Booking, Promotion, PaymentCard, Ticket, TicketType, Showtime, Showroom, Seat
 from django.contrib.auth.models import User
 import hashlib
@@ -175,9 +175,11 @@ def showtimes(request, movie_id):
     return JsonResponse({"showtimes": ShowtimeSerializer(showtimes, many=True).data}, status=200)
 
 @api_view(['POST'])
-def add_showtime(request, movie_id):
-    movie = Movie.objects.get(id=movie_id)
+def add_showtime(request):
+    movie = Movie.objects.get(title=request.data.get("movie"))
     showroom = Showroom.objects.get(name=request.data.get("showroom"))
+    if Showtime.objects.filter(time=request.data.get("time"), showroom=showroom).exists():
+        return JsonResponse({"error": "Showtime already exists for chosen showroom"}, status=400)
     showtime = Showtime.objects.create(
         time = datetime.strptime(request.data.get("time"), "%Y-%m-%d %H:%M:%S"),
         duration = request.data.get("duration"),
@@ -264,6 +266,7 @@ def get_promotion(request, name):
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
+
 @api_view(['POST'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -306,3 +309,55 @@ def get_logging_metrics(request):
         "total_purchases": logger.total_purchases,
     }
     return JsonResponse({"metrics": metrics}, status=200)
+  
+def create_movie(request):
+    movie = Movie.objects.create(
+        title = request.data.get("title"),
+        description = request.data.get("description"),
+        trailer_link = request.data.get("trailer_link"),
+        img_link = request.data.get("img_link"),
+        duration = request.data.get("duration"),
+        release_date = datetime.strptime(request.data.get("release_date"), "%Y-%m-%d")
+    )
+    return JsonResponse({"movie": MovieSerializer(movie).data}, status=201)
+
+
+@api_view(['PUT'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_movie(request, id):
+    movie = Movie.objects.get(id=id)
+    movie.title = request.data.get("title")
+    movie.description = request.data.get("description")
+    movie.trailer_link = request.data.get("trailer_link")
+    movie.img_link = request.data.get("img_link")
+    movie.duration = request.data.get("duration")
+    movie.release_date = datetime.strptime(request.data.get("release_date"), "%Y-%m-%d")
+    movie.save()
+    return JsonResponse({"movie": MovieSerializer(movie).data}, status=200)
+
+@api_view(['DELETE'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_movie(request, id):
+    movie = Movie.objects.get(id=id)
+    movie.delete()
+    return JsonResponse({"message": "Movie deleted successfully"}, status=200)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_showroom(request):
+    showroom = Showroom.objects.create(
+        name = request.data.get("name"),
+        seat_count = request.data.get("seat_count")
+    )
+    return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=201)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_showroom(request, id):
+    showroom = Showroom.objects.get(id=id)
+    return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=200)
+

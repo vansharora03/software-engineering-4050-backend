@@ -212,7 +212,7 @@ def send_order_email(request):
     try:
         booking = Booking.objects.get(id=booking_id)
         tickets = Ticket.objects.filter(booking=booking)
-        
+        promotion = booking.promotion
         showtime = None
         arr = []
         total =0
@@ -227,7 +227,8 @@ def send_order_email(request):
                      f'Showtime: {showtime.time}\n'
                      f'Showroom: {showtime.showroom.name}\n'
                      f'Seat number(s): {",".join(arr)}\n'
-                     f'Total price: ${total}'),
+                     f'Total price: ${round(total * (1 - promotion.discount_percentage / 100), 2)}'
+            ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             fail_silently=False,

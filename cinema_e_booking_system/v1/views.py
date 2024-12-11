@@ -175,11 +175,9 @@ def showtimes(request, movie_id):
     return JsonResponse({"showtimes": ShowtimeSerializer(showtimes, many=True).data}, status=200)
 
 @api_view(['POST'])
-def add_showtime(request):
-    movie = Movie.objects.get(title=request.data.get("movie"))
+def add_showtime(request, movie_id):
+    movie = Movie.objects.get(id=movie_id)
     showroom = Showroom.objects.get(name=request.data.get("showroom"))
-    if Showtime.objects.filter(time=request.data.get("time"), showroom=showroom).exists():
-        return JsonResponse({"error": "Showtime already exists for chosen showroom"}, status=400)
     showtime = Showtime.objects.create(
         time = datetime.strptime(request.data.get("time"), "%Y-%m-%d %H:%M:%S"),
         duration = request.data.get("duration"),
@@ -210,7 +208,7 @@ def add_booking(request):
     card = PaymentCard.objects.get(id=request.data.get("card"))
     promotion = None
     if (request.data.get("promotion")):
-        promotion = Promotion.objects.get(id=request.data.get("promotion"))
+        promotion = Promotion.objects.get(name=request.data.get("promotion"))
     booking = Booking.objects.create(
         user = request.user,
         payment_card = card,
@@ -316,3 +314,22 @@ def add_showroom(request):
 def get_showroom(request, id):
     showroom = Showroom.objects.get(id=id)
     return JsonResponse({"showroom": ShowroomSerializer(showroom).data}, status=200)
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_promotion(request):
+    promotion = Promotion.objects.create(
+        name = request.data.get("name"),
+        discount_percentage = request.data.get("discount"),
+    )
+    return JsonResponse({"promotion": PromotionSerializer(promotion).data}, status=201)
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_promotions(request):
+    promotion = Promotion.objects.all()
+    return JsonResponse({"promotions": PromotionSerializer(promotion, many=True).data}, status=200)
+
+

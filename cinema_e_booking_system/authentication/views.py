@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
@@ -14,6 +15,8 @@ from django.utils.crypto import get_random_string
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
+
+
 
 @api_view(['GET', 'PUT'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
@@ -91,30 +94,113 @@ def reset(request):
 def register(request):
     serializer = CustomerSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save()  
-        user = serializer.instance.user  
-        
-        # Generate a unique token for email verification
+        # Save the customer instance
+        serializer.save()
+
+        # Access the associated user and generate a verification token
+        user = serializer.instance.user  # Access associated User
         token = get_random_string(32)
         
-        # Save the token in the Customer model for verification
+        # Assign the token to the customer and save it
         customer = serializer.instance
         customer.verification_token = token
         customer.save()
-        
-        # Send a verification email with the token
-        verification_url = request.build_absolute_uri(reverse('verify-email', kwargs={'token': token}))
-        send_mail(
-            subject='Verify your email address',
-            message=f'Click the link to verify your account: {verification_url}',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[request.data['email']],
-            fail_silently=False,
-        )
+
+        # Send the verification email with the token
+        send_verification_email(user_email=request.data['email'], verification_token=token)
 
         return Response({"detail": "Registration successful! Please check your email to verify your account."}, status=status.HTTP_201_CREATED)
     
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Custom error handling for registration issues (e.g., username already taken)
+    errors = serializer.errors
+    if "username" in errors:
+        return Response({"detail": "This username is already taken. Please choose another."}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        
+def send_verification_email(user_email, verification_token):
+    # Build the verification URL
+    verification_url = f"http://127.0.0.1:8000/verify-email/{verification_token}/"
+
+    # Styled email content
+    email_subject = "Verify Your Email Address"
+    email_body = f"""
+    <html>
+    <head>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }}
+            .email-container {{
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px;
+            }}
+            h1 {{
+                text-align: center;
+                color: #4CAF50;
+            }}
+            p {{
+                font-size: 16px;
+                margin: 10px 0;
+            }}
+            .button {{
+                display: inline-block;
+                padding: 10px 20px;
+                margin: 20px 0;
+                font-size: 16px;
+                color: white;
+                background-color: #4CAF50;
+                text-decoration: none;
+                border-radius: 5px;
+                text-align: center;
+            }}
+            .button:hover {{
+                background-color: #45a049;
+            }}
+            .footer {{
+                text-align: center;
+                font-size: 12px;
+                color: #777;
+                margin-top: 20px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="email-container">
+            <h1>Verify Your Email</h1>
+            <p>Hello,</p>
+            <p>Thank you for signing up! Please click the button below to verify your email address:</p>
+            <p style="text-align: center;">
+                <a href="{verification_url}" class="button">Verify Email</a>
+            </p>
+            <p>If the button doesn’t work, copy and paste the following link into your browser:</p>
+            <p><a href="{verification_url}">{verification_url}</a></p>
+            <div class="footer">
+                <p>&copy; {datetime.datetime.now().year} Your Company. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Send the email
+    send_mail(
+        subject=email_subject,
+        message="This is a plain-text fallback for non-HTML email clients.",
+        from_email="no-reply@yourdomain.com",
+        recipient_list=[user_email],
+        html_message=email_body,  # Set the HTML content
+    )
+
 
 
 @api_view(['GET'])

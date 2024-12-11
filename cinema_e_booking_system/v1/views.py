@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpRequest
 from django.http import JsonResponse
@@ -15,6 +16,24 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from django.http import JsonResponse
 from rest_framework.response import Response
+from v1.factories.ticket_factory import TicketFactory
+from v1.serializers import TicketSerializer
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_ticket(request):
+    try:
+        ticket = TicketFactory.create_ticket(
+            booking_id=request.data.get("booking"),
+            ticket_type_id=request.data.get("ticket_type"),
+            seat_number=request.data.get("seat_number"),
+            showtime_id=request.data.get("showtime"),
+        )
+        return Response(TicketSerializer(ticket).data, status=201)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
+
 
 
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, PaymentCard, Showtime, Seat, Booking, TicketType, Ticket, Promotion
+from .models import Movie, PaymentCard, Showtime, Seat, Booking, TicketType, Ticket, Promotion, Showroom
 
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,4 +40,9 @@ class TicketSerializer(serializers.ModelSerializer):
 class PromotionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Promotion
+        fields = "__all__"
+
+class ShowroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Showroom
         fields = "__all__"

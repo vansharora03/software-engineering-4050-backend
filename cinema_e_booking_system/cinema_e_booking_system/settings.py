@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+print("### DEBUG: settings.py is running! ###")
+
 from pathlib import Path
 from os import environ
 
@@ -56,6 +58,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # Move this to the top
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,7 +66,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = 'cinema_e_booking_system.urls'
@@ -100,7 +102,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'cinema',
         'USER': 'root',
-        'PASSWORD': 'sqlpass'
+        'PASSWORD': 'sqlpass',
+        'HOST': 'localhost',
+        'PORT': '3306'
     }
 }
 
